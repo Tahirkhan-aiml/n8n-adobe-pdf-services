@@ -1,0 +1,630 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e08359b0-2500-47b3-a8a5-1bb2fae83909",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        560,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pdf-services.adobe.io/assets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "mediaType",
+              "value": "application/pdf"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "0b43778a-1a5b-4ec2-a162-a22b5ffdfd4a",
+      "name": "Create Asset",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1920,
+        448
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {},
+      "id": "c8c2cb15-30db-4b9f-b378-71cdb626a71b",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1120,
+        304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Adobe API Wrapper\n\nSee Adobe documentation:\n- https://developer.adobe.com/document-services/docs/overview/pdf-services-api/howtos/\n- https://developer.adobe.com/document-services/docs/overview/pdf-extract-api/gettingstarted/\n\nIn short, this workflow does the following steps :\n\n- Authentication\n- Upload an asset (pdf) to adobe\n- Wait for the asset to be processed by Adobe\n- Download the result\n\n## Credential\n\nCredentials are not \"predefined\" and you'll have to create 2 custom credentials, detailed in the workflow.\n\n## Result\n\nThe result will depend on the transformation requested. It could be 1 of various files (json, zip...) accessible via download URL returned by the workflow.\n\nWorkflow can be tested with a PDF filed fetched with Dorpbox for example or any storage provider. ",
+        "height": 715.2927406867177,
+        "width": 667.6107231291055,
+        "color": 5
+      },
+      "id": "4b1dd91a-3be4-4e0f-b4c9-5403c3f8b5e3",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Testing for development",
+        "height": 463.937514110429,
+        "width": 857.2064431277577
+      },
+      "id": "ba73712b-7642-4ad0-b4d6-b4f79d592489",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        544,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "62bb6466-acf4-41e5-9444-c9ef608a6822",
+              "name": "endpoint",
+              "type": "string",
+              "value": "extractpdf"
+            },
+            {
+              "id": "0352f585-1434-4ab7-a704-a1e187fffa96",
+              "name": "json_payload",
+              "type": "object",
+              "value": "={{ \n{\n \"renditionsToExtract\": [\n \"tables\"\n ],\n \"elementsToExtract\": [\n \"text\",\n \"tables\"\n ]\n }\n}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "620ceec9-3f13-4041-b146-aad73b2d64b0",
+      "name": "Adobe API Query",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        880,
+        864
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "download",
+        "path": "/valerian/w/prod/_freelance/ADEZIF/AI/Source data/Brochures pour GPT/Brochure 3M/3M_doc_emballage VERSION FINALE.pdf"
+      },
+      "id": "a4e716b2-3e84-457a-8205-1285ad610fe2",
+      "name": "Load a test pdf file",
+      "type": "n8n-nodes-base.dropbox",
+      "position": [
+        880,
+        1040
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "bff337d1-202d-4d3b-9159-96dbcf701eca",
+      "name": "Query + File",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1168,
+        944
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "d6c5515d-d84b-40b4-ab26-3d2f8f761513",
+      "name": "Query + File + Asset information",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        2160,
+        448
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://pdf-services.adobe.io/operation/{{ $('Query + File + Asset information').item.json.endpoint }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Authenticartion (get token)').first().json[\"access_token\"] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ \n{\n...{ \"assetID\":$('Query + File + Asset information').first().json.assetID },\n...$('Query + File + Asset information').first().json.json_payload\n}\n}}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "5ef74b92-9cde-4274-a3fb-9a783c9050e6",
+      "name": "Process Query",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2624,
+        448
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "497fee90-fcc4-4677-be45-2b3ef9c4eb0e",
+      "name": "Wait 5 second",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        2848,
+        448
+      ],
+      "webhookId": "ed00a9a8-d599-4a98-86f8-a15176352c0a",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Process Query').item.json[\"headers\"][\"location\"] }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Authenticartion (get token)').first().json[\"access_token\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c5012910-5395-4078-94c3-6c35100716d6",
+      "name": "Try to download the result",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3072,
+        448
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "in progress"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "in progress"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "6d6917f6-abb9-4175-a070-a2f500d9f34f",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "failed"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "failed"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "e49f93d4-1bc8-4bb4-ac34-226d4d50bab8",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        3248,
+        448
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": []
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f5d133bf-096d-4aff-96bd-86a0760c0a2b",
+      "name": "Forward response to origin workflow",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3808,
+        464
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Wait for file do be processed",
+        "height": 336.57433650102917,
+        "width": 741.3069226712129
+      },
+      "id": "532ab737-b09d-4a3b-b227-22568500a49d",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2768,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 1- Credential for token request\n\nCreate a \"Custom Auth\" credential like this :\n\n```\n{\n \"headers\": {\n \"Content-Type\":\"application/x-www-form-urlencoded\"\n }, \n \"body\" : {\n \"client_id\": \"****\", \n \"client_secret\":\"****\"\n }\n}\n```",
+        "height": 700.9473619571734,
+        "width": 402.63171535688423,
+        "color": 5
+      },
+      "id": "3ac40cb1-038d-4870-87a3-e4f20a2fafdb",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 2- Credential for all other Queries\n\nCreate a \"Header Auth\" credential like this : \n\n```\nX-API-Key: **** (same value as client_id)\n```",
+        "height": 692.0175575715904,
+        "width": 1752.5923360342827,
+        "color": 5
+      },
+      "id": "77749064-ce58-408a-bfff-f1a5fb338544",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1792,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Workflow Input\n\n- endpoint: splitpdf, extractpdf, ...\n- json_payload : all endpoint payload except assetID which is handled in current workflow\n- **PDF Data as n8n Binary**\n\n\n### Example for **split** : \n\n```\n{\n \"endpoint\": \"splitpdf\",\n \"json_payload\": {\n \"splitoption\": \n { \"pageRanges\": [{\"start\": 1,\"end\": 2}]}\n }\n }\n}\n```\n\n### Example for **extractpdf**\n\n```\n{\n \"endpoint\": \"splitpdf\",\n \"json_payload\": {\n \"renditionsToExtract\": [\n \"tables\"\n ],\n \"elementsToExtract\": [\n \"text\",\n \"tables\"\n ]\n }\n}\n```",
+        "height": 718.8735380890446,
+        "width": 529.7500231395039,
+        "color": 5
+      },
+      "id": "03a56ba8-ab7a-4b9c-af43-883c50fd1f4e",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pdf-services.adobe.io/token",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "d59b7496-4739-42de-be75-e970570470e6",
+      "name": "Authenticartion (get token)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1488,
+        448
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $json.uploadUri }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "42559479-fde2-4748-b232-c322afb9452d",
+      "name": "Upload PDF File (asset)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2432,
+        448
+      ],
+      "typeVersion": 4.1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Wait 5 second",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Forward response to origin workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Forward response to origin workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Asset": {
+      "main": [
+        [
+          {
+            "node": "Query + File + Asset information",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Query + File": {
+      "main": [
+        [
+          {
+            "node": "Authenticartion (get token)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Query + File + Asset information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Query": {
+      "main": [
+        [
+          {
+            "node": "Wait 5 second",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5 second": {
+      "main": [
+        [
+          {
+            "node": "Try to download the result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adobe API Query": {
+      "main": [
+        [
+          {
+            "node": "Query + File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load a test pdf file": {
+      "main": [
+        [
+          {
+            "node": "Query + File",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Upload PDF File (asset)": {
+      "main": [
+        [
+          {
+            "node": "Process Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Authenticartion (get token)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Query + File + Asset information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Try to download the result": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticartion (get token)": {
+      "main": [
+        [
+          {
+            "node": "Create Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query + File + Asset information": {
+      "main": [
+        [
+          {
+            "node": "Upload PDF File (asset)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Load a test pdf file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Adobe API Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "instanceId": "f1073e0ef9d6c3f612165fb818e806875cadef32fd465fe392d4049f979c3bab"
+  },
+  "tags": []
+}
