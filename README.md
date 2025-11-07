@@ -56,3 +56,4 @@ Extract text/tables, split, merge, OCR — no code.
     "client_secret": "YOUR_CLIENT_SECRET"
   }
 }
+Made by Tahir khan
